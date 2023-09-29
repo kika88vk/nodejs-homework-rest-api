@@ -8,18 +8,28 @@ import Joi from 'joi';
 const router = express.Router()
 
 const contactAddSchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required(),
-  phone: Joi.string().required(),
+  name: Joi.string().required().messages({
+    "any.required": "missing required name field",
+  }),
+  email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required().messages({
+    "any.required": "missing required email field",
+  }),
+  phone: Joi.string().required().messages({
+    "any.required": "missing required phone field",
+  }),
 })
 
-router.get('/', async (res, next) => {
+
+
+
+router.get('/', async (req, res, next) => {
   try {
     const result = await contactsService.listContacts();
     res.json(result);
 
   } catch (error) {
     next(error);
+
   }
 
 })
@@ -28,10 +38,11 @@ router.get('/', async (res, next) => {
 
 router.get('/:contactId', async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const result = await contactsService.getContactById(id);
+    const { contactId } = req.params;
+
+    const result = await contactsService.getContactById(contactId);
     if (!result) {
-      throw HttpError(404, `Contact with id ${id}  not found`);
+      throw HttpError(404, `Contact with id: ${contactId}  not found`);
     }
     res.json(result);
 
@@ -46,8 +57,9 @@ router.get('/:contactId', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
+
     if (!Object.keys(req.body).length) {
-      throw HttpError(400, "Missing required name field")
+      throw HttpError(400, "Missing required  fields")
     }
 
     const { error } = contactAddSchema.validate(req.body);
@@ -61,6 +73,7 @@ router.post('/', async (req, res, next) => {
 
   } catch (error) {
     next(error);
+
   }
 
 })
@@ -70,10 +83,11 @@ router.post('/', async (req, res, next) => {
 router.delete('/:contactId', async (req, res, next) => {
 
   try {
-    const { id } = req.params;
-    const result = await contactsService.removeContact(id);
+    const { contactId } = req.params;
+
+    const result = await contactsService.removeContact(contactId);
     if (!result) {
-      throw HttpError(404, `Contact with ${id} not found`)
+      throw HttpError(404, `Contact with ${contactId} not found`)
     }
     res.json({
       message: "Contact deleted"
@@ -97,10 +111,10 @@ router.put('/:contactId', async (req, res, next) => {
     if (error) {
       throw HttpError(400, error.message)
     }
-    const { id } = req.params;
-    const result = await contactsService.updateContact(id, req.body);
+    const { contactId } = req.params;
+    const result = await contactsService.updateContact(contactId, req.body);
     if (!result) {
-      throw HttpError(404, `Contact with ${id} not found`)
+      throw HttpError(404, `Contact with ${contactId} not found`)
     }
 
     res.json(result);
