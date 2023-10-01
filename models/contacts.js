@@ -32,7 +32,7 @@ const removeContact = async (contactId) => {
 
 const addContact = async ({ name, email, phone }) => {
   const contacts = await listContacts();
-  // const { name, email, phone } = body;
+
   const newContact = {
     id: nanoid(),
     name,
@@ -44,15 +44,17 @@ const addContact = async ({ name, email, phone }) => {
   return newContact;
 }
 
-const updateContact = async (contactId, { name, email, phone }) => {
+const updateContact = async (contactId, body) => {
   const contacts = await listContacts();
-  // const { name, email, phone } = body;
+
   const index = contacts.findIndex(item => item.id === contactId);
   if (index === -1) {
     return null;
   }
-  contacts[index] = { contactId, name, email, phone };
+
+  contacts[index] = { ...contacts[index], ...body };
   await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+
   return contacts[index];
 }
 

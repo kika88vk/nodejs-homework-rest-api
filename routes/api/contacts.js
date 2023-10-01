@@ -19,7 +19,11 @@ const contactAddSchema = Joi.object({
   }),
 })
 
-
+const contactUpdateSchema = Joi.object({
+  name: Joi.string(),
+  email: Joi.string().email(),
+  phone: Joi.string(),
+}).or("name", "email", "phone");
 
 
 router.get('/', async (req, res, next) => {
@@ -102,22 +106,24 @@ router.delete('/:contactId', async (req, res, next) => {
 router.put('/:contactId', async (req, res, next) => {
 
   try {
+    const { contactId } = req.params;
     if (!Object.keys(req.body).length) {
-      throw HttpError(400, "All fields empty")
+      throw HttpError(400, "missing fields")
     }
 
-    const { error } = contactAddSchema.validate(req.body);
+    const { error } = contactUpdateSchema.validate(req.body);
 
     if (error) {
       throw HttpError(400, error.message)
     }
-    const { contactId } = req.params;
+
+
     const result = await contactsService.updateContact(contactId, req.body);
     if (!result) {
       throw HttpError(404, `Contact with ${contactId} not found`)
     }
 
-    res.json(result);
+    res.status(200).json(result);
 
   } catch (error) {
     next(error);
