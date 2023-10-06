@@ -1,5 +1,5 @@
 import express from 'express';
-
+import Contact from '../../models/Contact.js';
 import contactsService from "../../models/contacts.js";
 import { HttpError } from '../../helpers/index.js';
 import Joi from 'joi';
@@ -28,7 +28,7 @@ const contactUpdateSchema = Joi.object({
 
 router.get('/', async (req, res, next) => {
   try {
-    const result = await contactsService.listContacts();
+    const result = await Contact.find();
     res.json(result);
 
   } catch (error) {
@@ -40,95 +40,95 @@ router.get('/', async (req, res, next) => {
 
 
 
-router.get('/:contactId', async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
+// router.get('/:contactId', async (req, res, next) => {
+//   try {
+//     const { contactId } = req.params;
 
-    const result = await contactsService.getContactById(contactId);
-    if (!result) {
-      throw HttpError(404, `Contact with id: ${contactId}  not found`);
-    }
-    res.json(result);
+//     const result = await contactsService.getContactById(contactId);
+//     if (!result) {
+//       throw HttpError(404, `Contact with id: ${contactId}  not found`);
+//     }
+//     res.json(result);
 
-  } catch (error) {
-    next(error);
+//   } catch (error) {
+//     next(error);
 
-  }
+//   }
 
-})
-
-
-
-router.post('/', async (req, res, next) => {
-  try {
-
-    if (!Object.keys(req.body).length) {
-      throw HttpError(400, "Missing required  fields")
-    }
-
-    const { error } = contactAddSchema.validate(req.body);
-
-    if (error) {
-      throw HttpError(400, error.message)
-    }
-
-    const result = await contactsService.addContact(req.body);
-    res.status(201).json(result);
-
-  } catch (error) {
-    next(error);
-
-  }
-
-})
+// })
 
 
 
-router.delete('/:contactId', async (req, res, next) => {
+// router.post('/', async (req, res, next) => {
+//   try {
 
-  try {
-    const { contactId } = req.params;
+//     if (!Object.keys(req.body).length) {
+//       throw HttpError(400, "Missing required  fields")
+//     }
 
-    const result = await contactsService.removeContact(contactId);
-    if (!result) {
-      throw HttpError(404, `Contact with ${contactId} not found`)
-    }
-    res.json({
-      message: "Contact deleted"
-    })
-  } catch (error) {
-    next(error);
-  }
-})
+//     const { error } = contactAddSchema.validate(req.body);
 
+//     if (error) {
+//       throw HttpError(400, error.message)
+//     }
 
+//     const result = await contactsService.addContact(req.body);
+//     res.status(201).json(result);
 
-router.put('/:contactId', async (req, res, next) => {
+//   } catch (error) {
+//     next(error);
 
-  try {
-    const { contactId } = req.params;
-    if (!Object.keys(req.body).length) {
-      throw HttpError(400, "missing fields")
-    }
+//   }
 
-    const { error } = contactUpdateSchema.validate(req.body);
-
-    if (error) {
-      throw HttpError(400, error.message)
-    }
+// })
 
 
-    const result = await contactsService.updateContact(contactId, req.body);
-    if (!result) {
-      throw HttpError(404, `Contact with ${contactId} not found`)
-    }
 
-    res.status(200).json(result);
+// router.delete('/:contactId', async (req, res, next) => {
 
-  } catch (error) {
-    next(error);
-  }
+//   try {
+//     const { contactId } = req.params;
 
-})
+//     const result = await contactsService.removeContact(contactId);
+//     if (!result) {
+//       throw HttpError(404, `Contact with ${contactId} not found`)
+//     }
+//     res.json({
+//       message: "Contact deleted"
+//     })
+//   } catch (error) {
+//     next(error);
+//   }
+// })
+
+
+
+// router.put('/:contactId', async (req, res, next) => {
+
+//   try {
+//     const { contactId } = req.params;
+//     if (!Object.keys(req.body).length) {
+//       throw HttpError(400, "missing fields")
+//     }
+
+//     const { error } = contactUpdateSchema.validate(req.body);
+
+//     if (error) {
+//       throw HttpError(400, error.message)
+//     }
+
+
+//     const result = await contactsService.updateContact(contactId, req.body);
+//     if (!result) {
+//       throw HttpError(404, `Contact with ${contactId} not found`)
+//     }
+
+//     res.status(200).json(result);
+
+//   } catch (error) {
+//     next(error);
+//   }
+
+// })
 
 export default router;
