@@ -3,7 +3,7 @@ import logger from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import contactsRouter from './routes/api/contacts.js';
+import contactsRouter from './routes/api/contacts-router.js';
 
 dotenv.config();
 
