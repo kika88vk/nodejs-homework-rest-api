@@ -58,11 +58,11 @@ const login = async (req, res) => {
 }
 
 const getCurrent = async (req, res) => {
-    const { username, email } = req.user;
+    const { subscription, email } = req.user;
 
-    res.json({
-        username,
+    res.status(200).json({
         email,
+        subscription,
     })
 }
 
@@ -70,14 +70,26 @@ const logout = async (req, res) => {
     const { _id } = req.user;
     await User.findByIdAndUpdate(_id, { token: "" });
 
-    res.status(204).json({
-
-    })
+    res.status(204).json();
 }
+
+
+const updateSubscription = async (req, res) => {
+    const { _id } = req.user;
+    const result = await User.findByIdAndUpdate(_id, req.body);
+
+    if (!result) {
+        throw HttpError(404, "User not found")
+    }
+
+    res.status(200).json(result);
+}
+
 
 export default {
     register: ctrlWrapper(register),
     login: ctrlWrapper(login),
     getCurrent: ctrlWrapper(getCurrent),
     logout: ctrlWrapper(logout),
+    updateSubscription: ctrlWrapper(updateSubscription),
 }

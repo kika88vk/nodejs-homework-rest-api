@@ -5,11 +5,16 @@ import Contact from "../models/Contact.js";
 
 const getAll = async (req, res) => {
     const { _id: owner } = req.user;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, favorite } = req.query;
     const skip = (page - 1) * limit;
-    const result = await Contact.find({ owner }, "-createdAt -updatedAt", { skip, limit }).populate("owner", "username email");
+    if (favorite) {
+        const resultFavorite = await Contact.find({ owner, favorite: true }, "-createdAt -updatedAt", { skip, limit, }).populate("owner", "username email");
+        res.json(resultFavorite);
+    }
+    const result = await Contact.find({ owner }, "-createdAt -updatedAt", { skip, limit, }).populate("owner", "username email");
     res.json(result);
 }
+
 
 const getById = async (req, res) => {
     const { contactId } = req.params;
@@ -25,11 +30,13 @@ const getById = async (req, res) => {
     res.json(result);
 }
 
+
 const add = async (req, res) => {
     const { _id: owner } = req.user;
     const result = await Contact.create({ ...req.body, owner });
     res.status(201).json(result);
 }
+
 
 const deleteById = async (req, res) => {
     const { contactId } = req.params;
@@ -46,6 +53,7 @@ const deleteById = async (req, res) => {
     })
 }
 
+
 const updateById = async (req, res) => {
     const { contactId } = req.params;
     const { _id: owner } = req.user;
@@ -58,6 +66,7 @@ const updateById = async (req, res) => {
 
     res.status(200).json(result);
 }
+
 
 const updateFavorite = async (req, res) => {
     const { contactId } = req.params;
