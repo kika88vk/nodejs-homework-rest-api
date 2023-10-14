@@ -7,10 +7,17 @@ const getAll = async (req, res) => {
     const { _id: owner } = req.user;
     const { page = 1, limit = 10, favorite } = req.query;
     const skip = (page - 1) * limit;
-    if (favorite) {
+
+    if (favorite === "true") {
         const resultFavorite = await Contact.find({ owner, favorite: true }, "-createdAt -updatedAt", { skip, limit, }).populate("owner", "username email");
         res.json(resultFavorite);
     }
+
+    if (favorite === "false") {
+        const resultFavorite = await Contact.find({ owner, favorite: false }, "-createdAt -updatedAt", { skip, limit, }).populate("owner", "username email");
+        res.json(resultFavorite);
+    }
+
     const result = await Contact.find({ owner }, "-createdAt -updatedAt", { skip, limit, }).populate("owner", "username email");
     res.json(result);
 }
