@@ -4,6 +4,12 @@ import HttpError from "../helpers/HttpError.js";
 import ctrlWrapper from "../decorators/ctrlWrapper.js";
 import jwt from "jsonwebtoken";
 import 'dotenv/config.js';
+import gravatar from "gravatar";
+import fs from "fs/promises";
+import path from "path";
+import Jimp from "jimp";
+
+const avatarsPath = path.resolve("public", "avatars")
 
 const { JWT_SECRET } = process.env;
 
@@ -15,9 +21,11 @@ const register = async (req, res) => {
         throw HttpError(409, `${email} already in use`)
     }
 
+    const avatarURL = gravatar.url(email, { s: '250', r: 'pg', d: "wavatar" });
+
     const hashPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({ ...req.body, password: hashPassword });
+    const newUser = await User.create({ ...req.body, avatarURL, password: hashPassword });
 
     res.status(201).json({
         user: {
@@ -86,10 +94,33 @@ const updateSubscription = async (req, res) => {
 }
 
 
+const updateAvatar = async (req, res) => {
+    const { _id } = req.user;
+    const { path: oldPath, filename } = req.file;
+
+    const newPath = path.join(avatarsPath, filename);
+    const avatar = await Jimp.read(oldPath);
+    avatar.resize(250, 250);
+
+
+    await fs.rename(oldPath, newPath);
+
+    const avatarURL = path.join("avatars", filename);
+
+
+    await User.findByIdAndUpdate(_id, { avatarURL });
+
+    res.status(200).json({ avatarURL });
+
+}
+
+
+
 export default {
     register: ctrlWrapper(register),
     login: ctrlWrapper(login),
     getCurrent: ctrlWrapper(getCurrent),
     logout: ctrlWrapper(logout),
     updateSubscription: ctrlWrapper(updateSubscription),
+    updateAvatar: ctrlWrapper(updateAvatar),
 }

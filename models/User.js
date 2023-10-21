@@ -32,7 +32,8 @@ const userSchema = new Schema({
     owner: {
         type: Schema.Types.ObjectId,
         ref: 'user',
-    }
+    },
+    avatarURL: String,
 
 }, { versionKey: false, timestamps: true })
 

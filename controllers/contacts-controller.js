@@ -1,6 +1,10 @@
 import { ctrlWrapper } from "../decorators/index.js";
 import { HttpError } from "../helpers/index.js";
 import Contact from "../models/Contact.js";
+import fs from "fs/promises";
+import path from "path";
+
+const avatarsPath = path.resolve("public", "avatars")
 
 
 const getAll = async (req, res) => {
@@ -28,7 +32,7 @@ const getById = async (req, res) => {
     const { _id: owner } = req.user;
 
     // const result = await Contact.findById(contactId);
-    const result = await Contact.findOne({ _id: id, owner });
+    const result = await Contact.findOne({ _id: contactId, owner });
 
     if (!result) {
         throw HttpError(404, `Contact with id: ${contactId}  not found`);
@@ -40,7 +44,11 @@ const getById = async (req, res) => {
 
 const add = async (req, res) => {
     const { _id: owner } = req.user;
-    const result = await Contact.create({ ...req.body, owner });
+    const { path: oldPath, filename } = req.file;
+    const newPath = path.join(avatarsPath, filename);
+    await fs.rename(oldPath, newPath);
+    const avatarURL = path.join("avatars", filename);
+    const result = await Contact.create({ ...req.body, avatarURL, owner });
     res.status(201).json(result);
 }
 
@@ -50,7 +58,7 @@ const deleteById = async (req, res) => {
     const { _id: owner } = req.user;
 
     // const result = await Contact.findByIdAndDelete(contactId);
-    const result = await Contact.findOneAndDelete({ _id: id });
+    const result = await Contact.findOneAndDelete({ _id: contactId, owner });
 
     if (!result) {
         throw HttpError(404, `Contact with ${contactId} not found`)
